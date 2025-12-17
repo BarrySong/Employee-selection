@@ -65,70 +65,85 @@ const App: React.FC = () => {
   const rightZones = ZONES.filter(z => z.col === 1).sort((a,b) => a.row - b.row);
 
   return (
-    <div className="min-h-screen bg-slate-100 flex flex-col items-center py-10 font-mono text-slate-800">
+    <div className="min-h-screen bg-slate-100 flex flex-col items-center py-6 md:py-10 font-mono text-slate-800 overflow-x-hidden">
       
       {/* Header Controls */}
-      <div className="w-full max-w-4xl flex justify-between items-end mb-8 px-6">
-        <div>
-           <h1 className="text-3xl font-black uppercase tracking-widest leading-none">牛马请选座</h1>
-           <p className="text-sm text-slate-500 font-bold mt-2 border-l-4 border-slate-900 pl-3">
+      <div className="w-full max-w-4xl flex flex-col md:flex-row justify-between items-center md:items-end mb-4 md:mb-8 px-4 md:px-6 gap-4 md:gap-0 z-20">
+        <div className="text-center md:text-left">
+           <h1 className="text-2xl md:text-3xl font-black uppercase tracking-widest leading-none">牛马请选座</h1>
+           <p className="text-xs md:text-sm text-slate-500 font-bold mt-2 border-none md:border-l-4 border-slate-900 md:pl-3">
              24个座位 / 任君挑选
            </p>
         </div>
         <button
           onClick={handleShare}
-          className="flex items-center gap-2 px-6 py-3 bg-slate-900 text-white text-xs font-bold uppercase tracking-widest hover:bg-slate-700 transition-all shadow-lg hover:-translate-y-0.5"
+          className="flex items-center gap-2 px-6 py-3 bg-slate-900 text-white text-xs font-bold uppercase tracking-widest hover:bg-slate-700 transition-all shadow-lg hover:-translate-y-0.5 rounded-full md:rounded-none"
         >
           {copied ? <Check size={16} /> : <Share2 size={16} />}
           {copied ? '链接已复制' : '分享链接'}
         </button>
       </div>
 
-      {/* Main Floor Plan Container */}
-      <div className="bg-white p-12 lg:p-16 shadow-2xl border-t-8 border-slate-900 relative overflow-hidden">
+      {/* Wrapper to center the scaled content and hide overflow */}
+      <div className="w-full flex justify-center md:block md:w-auto relative">
         
-        {/* Subtle Gradient Background for Depth */}
-        <div className="absolute inset-0 bg-[radial-gradient(circle_at_50%_0%,_#ffffff_0%,_#f1f5f9_100%)] pointer-events-none"></div>
-
-        {/* Floor Pattern Overlay */}
-        <div className="absolute inset-0 bg-[linear-gradient(rgba(15,23,42,0.03)_1px,transparent_1px),linear-gradient(90deg,rgba(15,23,42,0.03)_1px,transparent_1px)] bg-[size:20px_20px] pointer-events-none mix-blend-multiply"></div>
-
-        {/* MAIN STAFF SEATING AREA */}
-        <div className="relative flex gap-24 lg:gap-32 justify-center z-0">
+        {/* Main Floor Plan Container - Scaled on Mobile */}
+        <div className={`
+            bg-white p-12 lg:p-16 shadow-2xl border-t-8 border-slate-900 relative
+            
+            /* Mobile Adaptation: Scale down without changing layout */
+            transform scale-[0.45] sm:scale-75 md:scale-100 origin-top
+            
+            /* Force width on mobile to maintain side-by-side layout before scaling */
+            min-w-[750px] md:min-w-0
+            
+            /* Compensate for vertical whitespace caused by scaling */
+            mb-[-500px] sm:mb-[-250px] md:mb-0
+        `}>
           
-          {/* Left Column */}
-          <div className="flex flex-col gap-12 relative">
-             <div className="absolute -left-8 top-0 bottom-0 border-l border-dashed border-slate-300"></div>
-             
-             {leftZones.map(zone => (
-               <Zone key={zone.id} zone={zone} seats={seats} onSeatClick={handleSeatClick} />
-             ))}
+          {/* Subtle Gradient Background for Depth */}
+          <div className="absolute inset-0 bg-[radial-gradient(circle_at_50%_0%,_#ffffff_0%,_#f1f5f9_100%)] pointer-events-none"></div>
+
+          {/* Floor Pattern Overlay */}
+          <div className="absolute inset-0 bg-[linear-gradient(rgba(15,23,42,0.03)_1px,transparent_1px),linear-gradient(90deg,rgba(15,23,42,0.03)_1px,transparent_1px)] bg-[size:20px_20px] pointer-events-none mix-blend-multiply"></div>
+
+          {/* MAIN STAFF SEATING AREA */}
+          <div className="relative flex gap-24 lg:gap-32 justify-center z-0">
+            
+            {/* Left Column */}
+            <div className="flex flex-col gap-12 relative">
+               <div className="absolute -left-8 top-0 bottom-0 border-l border-dashed border-slate-300"></div>
+               
+               {leftZones.map(zone => (
+                 <Zone key={zone.id} zone={zone} seats={seats} onSeatClick={handleSeatClick} />
+               ))}
+            </div>
+
+            {/* Central Walkway Marker */}
+            <div className="absolute left-1/2 top-0 bottom-0 -translate-x-1/2 flex flex-col items-center justify-center opacity-30 pointer-events-none">
+               <div className="h-full border-r-2 border-dashed border-slate-400"></div>
+               <span className="bg-white py-4 text-xs font-bold text-slate-500 tracking-[0.5em] rotate-90 absolute">WALKWAY</span>
+            </div>
+
+            {/* Right Column */}
+            <div className="flex flex-col gap-12 relative">
+               <div className="absolute -right-8 top-0 bottom-0 border-r border-dashed border-slate-300"></div>
+
+               {rightZones.map(zone => (
+                 <Zone key={zone.id} zone={zone} seats={seats} onSeatClick={handleSeatClick} />
+               ))}
+            </div>
+
           </div>
 
-          {/* Central Walkway Marker */}
-          <div className="absolute left-1/2 top-0 bottom-0 -translate-x-1/2 flex flex-col items-center justify-center opacity-30 pointer-events-none">
-             <div className="h-full border-r-2 border-dashed border-slate-400"></div>
-             <span className="bg-white py-4 text-xs font-bold text-slate-500 tracking-[0.5em] rotate-90 absolute">WALKWAY</span>
-          </div>
-
-          {/* Right Column */}
-          <div className="flex flex-col gap-12 relative">
-             <div className="absolute -right-8 top-0 bottom-0 border-r border-dashed border-slate-300"></div>
-
-             {rightZones.map(zone => (
-               <Zone key={zone.id} zone={zone} seats={seats} onSeatClick={handleSeatClick} />
-             ))}
+          {/* Scale/Info Footer - Office Entrance */}
+          <div className="mt-12 flex flex-col items-start justify-center relative z-10">
+              {/* The door line - shortened to w-48 */}
+              <div className="w-60 h-5 bg-slate-900 mb-8"></div>
+              <span className="text-3xl text-slate-500 font-bold uppercase tracking-wider">办公室大门</span>
           </div>
 
         </div>
-
-        {/* Scale/Info Footer - Office Entrance */}
-        <div className="mt-12 flex flex-col items-start justify-center relative z-10">
-            {/* The door line - shortened to w-48 */}
-            <div className="w-60 h-5 bg-slate-900 mb-8"></div>
-            <span className="text-3xl text-slate-500 font-bold uppercase tracking-wider">办公室大门</span>
-        </div>
-
       </div>
 
       {/* Modals */}
