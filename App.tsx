@@ -123,9 +123,9 @@ const App: React.FC = () => {
         </div>
 
         {/* Scale/Info Footer - Office Entrance */}
-        <div className="mt-12 flex flex-col items-center justify-center relative z-10">
+        <div className="mt-12 flex flex-col items-start justify-center relative z-10">
             {/* The door line - shortened to w-48 */}
-            <div className="w-48 h-2 bg-slate-900 mb-4"></div>
+            <div className="w-60 h-5 bg-slate-900 mb-8"></div>
             <span className="text-3xl text-slate-500 font-bold uppercase tracking-wider">办公室大门</span>
         </div>
 
