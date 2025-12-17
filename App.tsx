@@ -126,9 +126,9 @@ const App: React.FC = () => {
 
         {/* Scale/Info Footer */}
         <div className="mt-12 pt-4 border-t-2 border-slate-900 flex justify-between items-center text-[10px] text-slate-500 font-bold uppercase tracking-wider relative z-10">
-            <span>Scale </span>
-            <span>Elevation: L1</span>
-            <span>Total Capacity: 24</span>
+            <span>大门 </span>
+            <span> </span>
+            <span> </span>
         </div>
 
       </div>
