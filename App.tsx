@@ -1,9 +1,10 @@
 import React, { useState, useEffect, useCallback } from 'react';
-import { Share2, Check } from 'lucide-react';
+import { Share2, Check, Loader2 } from 'lucide-react';
 import { Zone } from './components/Zone';
 import { EditSeatModal } from './components/EditSeatModal';
 import { SeatData, SeatMap, ZoneData } from './types';
-import { encodeStateToUrl, decodeStateFromUrl } from './services/urlState';
+import { encodeStateToUrl } from './services/urlState';
+import { subscribeToSeats, updateSeatInDb } from './services/firebase';
 
 // 6 Zones for the main staff area (24 people)
 const ZONES: ZoneData[] = [
@@ -22,24 +23,19 @@ const App: React.FC = () => {
   const [selectedSeat, setSelectedSeat] = useState<SeatData | null>(null);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [copied, setCopied] = useState(false);
+  const [isLoading, setIsLoading] = useState(true);
 
+  // Initialize Firebase Listener
   useEffect(() => {
-    const urlState = decodeStateFromUrl();
-    if (urlState) setSeats(urlState);
-    else {
-      try {
-        const local = localStorage.getItem('office_seats');
-        if (local) setSeats(JSON.parse(local));
-      } catch(e) {}
-    }
+    // This creates a live connection to the database
+    const unsubscribe = subscribeToSeats((data) => {
+      setSeats(data);
+      setIsLoading(false);
+    });
+
+    // Cleanup listener on unmount
+    return () => unsubscribe();
   }, []);
-
-  useEffect(() => {
-    if (Object.keys(seats).length > 0) {
-       encodeStateToUrl(seats);
-       localStorage.setItem('office_seats', JSON.stringify(seats));
-    }
-  }, [seats]);
 
   const handleSeatClick = useCallback((zoneId: number, seatIndex: number) => {
     const seatId = `${zoneId}-${seatIndex}`;
@@ -49,7 +45,14 @@ const App: React.FC = () => {
   }, [seats]);
 
   const handleSaveSeat = (updatedSeat: SeatData) => {
+    // 1. Optimistic update (update UI immediately)
     setSeats((prev) => ({ ...prev, [updatedSeat.id]: updatedSeat }));
+    
+    // 2. Send to Firebase (Real source of truth)
+    updateSeatInDb(updatedSeat).catch((err) => {
+        console.error("Failed to sync to database", err);
+        alert("同步失败，请检查网络");
+    });
   };
 
   const handleShare = () => {
@@ -70,9 +73,12 @@ const App: React.FC = () => {
       {/* Header Controls */}
       <div className="w-full max-w-4xl flex flex-col md:flex-row justify-between items-center md:items-end mb-4 md:mb-8 px-4 md:px-6 gap-4 md:gap-0 z-20">
         <div className="text-center md:text-left">
-           <h1 className="text-2xl md:text-3xl font-black uppercase tracking-widest leading-none">牛马请选座</h1>
+           <div className="flex items-center gap-3 justify-center md:justify-start">
+             <h1 className="text-2xl md:text-3xl font-black uppercase tracking-widest leading-none">牛马请选座</h1>
+             {isLoading && <Loader2 className="animate-spin text-slate-400" size={20}/>}
+           </div>
            <p className="text-xs md:text-sm text-slate-500 font-bold mt-2 border-none md:border-l-4 border-slate-900 md:pl-3">
-             24个座位 / 任君挑选
+             {isLoading ? "正在同步数据..." : "24个座位 / 数据实时同步中"}
            </p>
         </div>
         <button
